@@ -1,120 +1,338 @@
 
-<!doctype html>
+<!DOCTYPE html>
 <html lang="ru">
 <head>
-<meta charset="utf-8">
-<meta name="viewport" content="width=device-width, initial-scale=1">
-<title>Калькулятор себестоимости</title>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Fashion Calculator 2.0</title>
 <style>
 *{box-sizing:border-box}
-body{margin:0;background:#f6f3f5;color:#25202a;font-family:system-ui,-apple-system,sans-serif}
-main{max-width:650px;margin:auto;padding:24px 16px 70px}
-h1{font-size:30px;line-height:1.1}
-h2{font-size:19px}
-p{color:#716b75;line-height:1.5}
+body{margin:0;background:#f6f2f5;color:#29222d;font-family:system-ui,-apple-system,sans-serif}
+main{max-width:700px;margin:auto;padding:22px 15px 70px}
+h1{font-size:30px;line-height:1.15}
+h2{font-size:20px;margin:0 0 15px}
+p,small{color:#756b77;line-height:1.5}
 .card{background:white;border-radius:20px;padding:20px;margin:15px 0}
-label{display:block;font-size:14px;font-weight:600;margin:15px 0 6px}
-input{width:100%;padding:13px;border:1px solid #ddd6df;border-radius:10px;font-size:18px}
+label{display:block;font-size:13px;font-weight:650;margin:12px 0 6px}
+input,select{width:100%;padding:12px;border:1px solid #ddd4de;border-radius:10px;font:inherit;font-size:16px;background:white}
 .grid{display:grid;grid-template-columns:1fr 1fr;gap:12px}
-.result{background:#29202f;color:white}
-.result p{color:#d3c6d7}
-.line{display:flex;justify-content:space-between;gap:12px;padding:13px 0;border-bottom:1px solid #ffffff25}
+button{border:0;border-radius:11px;padding:13px;background:#7d4c70;color:white;font:inherit;font-weight:650}
+.tabs{display:flex;gap:8px}
+.tabs button{flex:1;background:#e8dfe8;color:#302534}
+.tabs button.active{background:#39273e;color:white}
+details{border-top:1px solid #eee6ed;padding:13px 0}
+summary{font-weight:700;cursor:pointer}
+.note{font-size:12px;color:#817582;margin:8px 0}
+.result{background:#302337;color:white}
+.result h2{color:white}
+.line{display:flex;justify-content:space-between;gap:12px;padding:12px 0;border-bottom:1px solid #ffffff25}
 .line strong{text-align:right}
-.big strong{color:#f1b9d7;font-size:24px}
-button{background:#885473;color:white;border:0;border-radius:12px;padding:15px;font-size:15px;font-weight:bold;width:100%}
-small{color:#837a85}
+.big strong{font-size:23px;color:#f9c7e2}
+.result small{color:#e0d3df}
+.notice{background:#f7edf3;padding:12px;border-radius:10px;font-size:13px}
+.full{width:100%;margin-top:12px}
+@media(max-width:350px){.grid{grid-template-columns:1fr}}
 </style>
 </head>
 <body>
 <main>
-<p>FASHION TOOLS · БЕСПЛАТНО</p>
-<h1>Сколько ты действительно зарабатываешь на изделии?</h1>
-<p>Введи свои цифры. Калькулятор автоматически покажет расходы, прибыль и необходимое количество заказов.</p>
+<small>FASHION TOOLS · ВЕРСИЯ 2.0</small>
+<h1>Калькулятор себестоимости швейного изделия</h1>
+<p>Рассчитай стоимость производства, продажи и прибыль. Ненужные поля оставляй пустыми.</p>
 
-<section class="card">
-<h2>01. Продажа и материалы</h2>
-<label>Цена продажи, ₽</label><input id="price" type="number" value="5000">
-<div class="grid">
-<div><label>Ткань и материалы, ₽</label><input id="fabric" type="number" value="900"></div>
-<div><label>Фурнитура, ₽</label><input id="hardware" type="number" value="250"></div>
-<div><label>Расходники и упаковка, ₽</label><input id="supplies" type="number" value="150"></div>
-<div><label>Другие расходы, ₽</label><input id="other" type="number" value="0"></div>
+<div class="card">
+<h2>Сценарий</h2>
+<div class="tabs">
+<button id="tabNow" class="active" onclick="switchTo('now')">Сейчас</button>
+<button id="tabFuture" onclick="switchTo('future')">В перспективе</button>
 </div>
-</section>
-
-<section class="card">
-<h2>02. Работа и накладные расходы</h2>
-<div class="grid">
-<div><label>Часов на изделие</label><input id="hours" type="number" value="2"></div>
-<div><label>Стоимость часа, ₽</label><input id="rate" type="number" value="600"></div>
+<p class="note">Каждый сценарий хранит свои цифры. Можно планировать будущие расходы.</p>
+<button class="full" onclick="copyScenario()">Скопировать текущие цифры в другой сценарий</button>
 </div>
-<label>Накладные расходы на изделие, ₽</label><input id="overhead" type="number" value="200">
+
+<div class="card">
+<h2>01. Изделие и материалы</h2>
 <div class="grid">
-<div><label>Комиссии, % от цены</label><input id="commission" type="number" value="5"></div>
-<div><label>Налоги, % от выручки</label><input id="tax" type="number" value="6"></div>
+<div><label>Цена продажи, ₽</label><input id="price" type="number" placeholder="2700"></div>
+<div><label>Изделий в месяц, шт.</label><input id="qty" type="number" placeholder="200"></div>
+<div><label>Ткань и материалы на изделие, ₽</label><input id="fabric" type="number" placeholder="600"></div>
+<div><label>Фурнитура на изделие, ₽</label><input id="hardware" type="number" placeholder="50"></div>
+<div><label>Расходники и упаковка, ₽</label><input id="supplies" type="number" placeholder="40"></div>
+<div><label>Другие прямые расходы, ₽</label><input id="other" type="number" placeholder="0"></div>
 </div>
-</section>
+</div>
 
-<section class="card">
-<h2>03. План дохода</h2>
+<div class="card">
+<h2>02. Работа специалистов</h2>
+<p class="note">У каждого специалиста свой способ оплаты.</p>
+
+<details open>
+<summary>Швея</summary>
+<label>Способ оплаты</label>
+<select id="sewMode" onchange="renderModes()">
+<option value="piece">За изделие</option>
+<option value="hour">За час</option>
+<option value="month">Зарплата за месяц</option>
+</select>
+<div id="sewFields"></div>
+</details>
+
+<details>
+<summary>Закройщик</summary>
+<label>Способ оплаты</label>
+<select id="cutMode" onchange="renderModes()">
+<option value="piece">За изделие</option>
+<option value="shift">За смену</option>
+<option value="month">Зарплата за месяц</option>
+</select>
+<div id="cutFields"></div>
+</details>
+
+<details>
+<summary>Дизайнер</summary>
+<label>Способ оплаты</label>
+<select id="designMode" onchange="renderModes()">
+<option value="project">За разработку модели</option>
+<option value="hour">За час работы над моделью</option>
+<option value="piece">За изделие</option>
+</select>
+<div id="designFields"></div>
+</details>
+
+<details>
+<summary>Конструктор</summary>
+<label>Способ оплаты</label>
+<select id="patternMode" onchange="renderModes()">
+<option value="project">За разработку лекал</option>
+<option value="hour">За час работы над лекалами</option>
+<option value="piece">За изделие</option>
+</select>
+<div id="patternFields"></div>
+</details>
+
+<label>Тираж для распределения разработки, шт.</label>
+<input id="batch" type="number" placeholder="Если пусто — объём в месяц">
+<p class="note">Например, разработка лекал за 12 000 ₽ на 200 изделий добавит 60 ₽ к себестоимости каждого.</p>
+</div>
+
+<div class="card">
+<h2>03. Содержание бизнеса</h2>
+<p class="note">Ежемесячные расходы. Если не платишь аренду или бухгалтеру — оставь пустым.</p>
 <div class="grid">
-<div><label>Заказов в месяц</label><input id="orders" type="number" value="20"></div>
-<div><label>Цель дохода, ₽</label><input id="goal" type="number" value="100000"></div>
+<div><label>Аренда, ₽/мес.</label><input id="rent" type="number" placeholder="0"></div>
+<div><label>Коммунальные платежи, ₽/мес.</label><input id="utilities" type="number" placeholder="0"></div>
+<div><label>Ремонт и обслуживание, ₽/мес.</label><input id="repair" type="number" placeholder="0"></div>
+<div><label>Износ оборудования, ₽/мес.</label><input id="wear" type="number" placeholder="0"></div>
+<div><label>Бухгалтерия, программы, связь, ₽/мес.</label><input id="admin" type="number" placeholder="0"></div>
+<div><label>Прочие накладные расходы, ₽/мес.</label><input id="overOther" type="number" placeholder="0"></div>
 </div>
-</section>
+<label>Платежи по кредитам за месяц, ₽</label>
+<input id="loans" type="number" placeholder="0">
+<p class="note">Кредитные платежи показываются отдельно в денежном остатке. Не включай один и тот же расход дважды: погашение долга и износ оборудования — разные показатели.</p>
+</div>
 
-<section class="card result">
-<h2>Твой результат</h2>
-<div class="line"><span>Материалы и расходники</span><strong id="direct"></strong></div>
-<div class="line"><span>Стоимость работы</span><strong id="labor"></strong></div>
-<div class="line"><span>Себестоимость с накладными</span><strong id="cost"></strong></div>
-<div class="line"><span>Комиссии и налоги</span><strong id="fees"></strong></div>
-<div class="line big"><span>Прибыль с изделия</span><strong id="profit"></strong></div>
-<div class="line"><span>Рентабельность продаж</span><strong id="margin"></strong></div>
-<div class="line"><span>Результат за месяц</span><strong id="monthly"></strong></div>
-<div class="line"><span>Заказов для достижения цели</span><strong id="needed"></strong></div>
-<p><small>Расчёт ориентировочный. Стоимость твоего труда включена в расходы. Налоги рассчитаны по упрощённой модели.</small></p>
-</section>
+<div class="card">
+<h2>04. Продажа и налоги</h2>
+<div class="grid">
+<div><label>Комиссия площадки, %</label><input id="commission" type="number" placeholder="Например, 25"></div>
+<div><label>Доставка и логистика на изделие, ₽</label><input id="delivery" type="number" placeholder="0"></div>
+<div><label>Реклама за месяц, ₽</label><input id="ads" type="number" placeholder="0"></div>
+<div>
+<label>Расчёт налога</label>
+<select id="taxMode">
+<option value="none">Не учитывать</option>
+<option value="revenue">Процент от выручки</option>
+<option value="profit">Условно от прибыли</option>
+</select>
+</div>
+<div><label>Ставка налога, %</label><input id="taxRate" type="number" placeholder="0"></div>
+<div><label>Цель прибыли в месяц, ₽</label><input id="goal" type="number" placeholder="100000"></div>
+</div>
+<p class="note">Комиссия — удержание WB, Ozon, Авито или посредника по твоему тарифу. Налоговая модель ориентировочная: вариант «от прибыли» не является точным расчётом УСН 15%.</p>
+</div>
 
-<section class="card">
-<button onclick="saveCSV()">Скачать расчёт CSV</button>
-<p><small>Все расчёты выполняются на устройстве. Данные не отправляются на сервер.</small></p>
-</section>
+<div class="card result">
+<h2>05. Финансовый результат</h2>
+<div class="line"><span>Материалы на изделие</span><strong id="rMaterials">—</strong></div>
+<div class="line"><span>Работа специалистов</span><strong id="rWork">—</strong></div>
+<div class="line"><span>Накладные расходы</span><strong id="rOverhead">—</strong></div>
+<div class="line"><span>Себестоимость производства</span><strong id="rCost">—</strong></div>
+<div class="line"><span>Расходы на продажу</span><strong id="rSales">—</strong></div>
+<div class="line"><span>Расчётный налог</span><strong id="rTax">—</strong></div>
+<div class="line big"><span>Прибыль на изделие</span><strong id="rProfit">—</strong></div>
+<div class="line"><span>Рентабельность продаж</span><strong id="rMargin">—</strong></div>
+<div class="line"><span>Прибыль за месяц</span><strong id="rMonthly">—</strong></div>
+<div class="line"><span>После платежей по кредитам</span><strong id="rCash">—</strong></div>
+<div class="line"><span>Изделий для достижения цели</span><strong id="rGoal">—</strong></div>
+<p><small>Это предварительная управленческая модель. Не учитывает автоматически возвраты, брак, страховые взносы, НДС и особенности налогового учёта.</small></p>
+</div>
+
+<div class="card">
+<h2>Сравнение сценариев</h2>
+<div class="line"><span>Сейчас</span><strong id="compareNow">—</strong></div>
+<div class="line"><span>В перспективе</span><strong id="compareFuture">—</strong></div>
+<button class="full" onclick="exportCSV()">Сохранить расчёт CSV</button>
+<p class="note">Введённые данные автоматически сохраняются в браузере этого устройства.</p>
+</div>
 </main>
 
 <script>
-const ids=["price","fabric","hardware","supplies","other","hours","rate","overhead","commission","tax","orders","goal"];
-const el=id=>document.getElementById(id);
-const num=id=>Math.max(0,Number(el(id).value)||0);
-const rub=n=>n.toLocaleString("ru-RU",{maximumFractionDigits:2})+" ₽";
-let result={};
+const $=id=>document.getElementById(id);
+const num=v=>Math.max(0,Number(v)||0);
+const money=v=>Number.isFinite(v)?
+v.toLocaleString("ru-RU",{maximumFractionDigits:2})+" ₽":"—";
 
-function calculate(){
- const direct=num("fabric")+num("hardware")+num("supplies")+num("other");
- const labor=num("hours")*num("rate");
- const cost=direct+labor+num("overhead");
- const fees=num("price")*(Math.min(100,num("commission"))+Math.min(100,num("tax")))/100;
- const profit=num("price")-cost-fees;
- const margin=num("price")?profit/num("price")*100:0;
- const monthly=profit*Math.floor(num("orders"));
- const needed=num("goal")===0?"0":profit>0?Math.ceil(num("goal")/profit):"Недостижимо";
- result={direct,labor,cost,fees,profit,margin,monthly,needed};
- ["direct","labor","cost","fees","profit","monthly"].forEach(id=>el(id).textContent=rub(result[id]));
- el("margin").textContent=margin.toFixed(1)+" %";
- el("needed").textContent=needed;
-}
-ids.forEach(id=>el(id).addEventListener("input",calculate));
-calculate();
+const regular=[
+"price","qty","fabric","hardware","supplies","other",
+"batch","rent","utilities","repair","wear","admin",
+"overOther","loans","commission","delivery","ads",
+"taxMode","taxRate","goal"
+];
+const roles=["sew","cut","design","pattern"];
+const modeFields={
+piece:[["piece","Оплата за изделие, ₽"]],
+hour:[["rate","Стоимость часа, ₽"],["hours","Часов работы"]],
+month:[["salary","Зарплата в месяц, ₽"],["days","Рабочих дней"],["daily","Изделий в день"]],
+shift:[["shiftPay","Оплата за смену, ₽"],["shifts","Количество смен"],["cutQty","Раскроено изделий"]],
+project:[["projectPay","Стоимость разработки, ₽"]]
+};
+const modes={
+sew:"piece",cut:"piece",design:"project",pattern:"project"
+};
+const storageKey="fashion-calculator-v2";
 
-function saveCSV(){
- const rows=[["Показатель","Значение"],...ids.map(id=>[id,num(id)]),...Object.entries(result)];
- const csv="\uFEFF"+rows.map(r=>r.join(";")).join("\r\n");
- const blob=new Blob([csv],{type:"text/csv;charset=utf-8"});
- const url=URL.createObjectURL(blob);
- const a=document.createElement("a");
- a.href=url;a.download="fashion-raschet.csv";a.click();
- setTimeout(()=>URL.revokeObjectURL(url),1000);
+function empty(){
+const d={};
+regular.forEach(id=>d[id]="");
+roles.forEach(r=>{
+d[r+"Mode"]=modes[r];
+Object.values(modeFields).flat().forEach(f=>d[r+"_"+f[0]]="");
+});
+d.taxMode="none";
+return d;
 }
-</script>
-</body>
-</html>
+
+let data={now:empty(),future:empty()};
+try{
+const saved=JSON.parse(localStorage.getItem(storageKey));
+if(saved&&saved.now&&saved.future)data=saved;
+}catch(e){}
+let current="now";
+
+function save(){
+try{localStorage.setItem(storageKey,JSON.stringify(data));}
+catch(e){}
+}
+
+function renderModes(){
+roles.forEach(role=>{
+const mode=$(role+"Mode").value;
+data[current][role+"Mode"]=mode;
+const target=$(role+"Fields");
+target.innerHTML="";
+modeFields[mode].forEach(([key,label])=>{
+const id=role+"_"+key;
+const wrapper=document.createElement("div");
+const lab=document.createElement("label");
+lab.textContent=label;
+const input=document.createElement("input");
+input.type="number";
+input.min="0";
+input.placeholder="0";
+input.value=data[current][id]||"";
+input.addEventListener("input",()=>{
+data[current][id]=input.value;
+update();
+});
+wrapper.append(lab,input);
+target.append(wrapper);
+});
+});
+update();
+}
+
+function show(){
+regular.forEach(id=>$(id).value=data[current][id]??"");
+roles.forEach(r=>$(r+"Mode").value=data[current][r+"Mode"]);
+$("tabNow").classList.toggle("active",current==="now");
+$("tabFuture").classList.toggle("active",current==="future");
+renderModes();
+}
+
+function switchTo(s){
+current=s;
+show();
+}
+
+function copyScenario(){
+const target=current==="now"?"future":"now";
+if(confirm("Скопировать текущие данные в другой сценарий?")){
+data[target]=JSON.parse(JSON.stringify(data[current]));
+save();
+update();
+}
+}
+
+function specialist(s,r,volume,batch){
+const mode=s[r+"Mode"];
+const v=k=>num(s[r+"_"+k]);
+if(mode==="piece")return v("piece");
+if(mode==="hour"){
+const cost=v("rate")*v("hours");
+return (r==="design"||r==="pattern")?
+(batch>0?cost/batch:0):cost;
+}
+if(mode==="project")return batch>0?v("projectPay")/batch:0;
+if(mode==="shift")return v("cutQty")>0?
+v("shiftPay")*v("shifts")/v("cutQty"):0;
+if(mode==="month")return v("days")*v("daily")>0?
+v("salary")/(v("days")*v("daily")):0;
+return 0;
+}
+
+function calculate(s){
+const v=id=>num(s[id]);
+const volume=Math.floor(v("qty"));
+const batch=Math.floor(v("batch")||volume);
+const price=v("price");
+const materials=v("fabric")+v("hardware")+v("supplies")+v("other");
+const work=roles.reduce((sum,r)=>sum+specialist(s,r,volume,batch),0);
+const fixed=v("rent")+v("utilities")+v("repair")+v("wear")+v("admin")+v("overOther");
+const overhead=volume>0?fixed/volume:0;
+const cost=materials+work+overhead;
+const commission=price*Math.min(100,v("commission"))/100;
+const sales=commission+v("delivery")+(volume>0?v("ads")/volume:0);
+const beforeTax=price-cost-sales;
+const rate=Math.min(100,v("taxRate"))/100;
+const tax=s.taxMode==="revenue"?price*rate:
+s.taxMode==="profit"?Math.max(0,beforeTax)*rate:0;
+const profit=beforeTax-tax;
+const monthly=profit*volume;
+const cash=monthly-v("loans");
+const margin=price>0?profit/price*100:0;
+
+const contribution=price-materials-work-commission-v("delivery")-
+(s.taxMode==="revenue"?price*rate:0);
+const goal=v("goal");
+let needed=Infinity;
+if(contribution>0){
+const target=s.taxMode==="profit"&&rate<1?
+goal/(1-rate):goal;
+if(!(s.taxMode==="profit"&&rate>=1&&goal>0)){
+needed=Math.ceil((fixed+v("ads")+target)/contribution);
+}
+}
+return {materials,work,overhead,cost,sales,tax,profit,monthly,cash,margin,needed,volume};
+}
+
+function update(){
+save();
+const r=calculate(data[current]);
+const mapping={
+rMaterials:r.materials,rWork:r.work,
+rOverhead:r.overhead,rCost:r.cost,
+rSales:r.sales,rTax:r.tax,
+rProfit:r.profit,rMonthly:r.monthly,rCash:r.cash
+};
+Object.entries(mapping).forEach(([id,value])=>$(id).textContent=money(value));
+$("rMargin
