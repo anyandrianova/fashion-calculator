@@ -1,0 +1,120 @@
+
+<!doctype html>
+<html lang="ru">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Калькулятор себестоимости</title>
+<style>
+*{box-sizing:border-box}
+body{margin:0;background:#f6f3f5;color:#25202a;font-family:system-ui,-apple-system,sans-serif}
+main{max-width:650px;margin:auto;padding:24px 16px 70px}
+h1{font-size:30px;line-height:1.1}
+h2{font-size:19px}
+p{color:#716b75;line-height:1.5}
+.card{background:white;border-radius:20px;padding:20px;margin:15px 0}
+label{display:block;font-size:14px;font-weight:600;margin:15px 0 6px}
+input{width:100%;padding:13px;border:1px solid #ddd6df;border-radius:10px;font-size:18px}
+.grid{display:grid;grid-template-columns:1fr 1fr;gap:12px}
+.result{background:#29202f;color:white}
+.result p{color:#d3c6d7}
+.line{display:flex;justify-content:space-between;gap:12px;padding:13px 0;border-bottom:1px solid #ffffff25}
+.line strong{text-align:right}
+.big strong{color:#f1b9d7;font-size:24px}
+button{background:#885473;color:white;border:0;border-radius:12px;padding:15px;font-size:15px;font-weight:bold;width:100%}
+small{color:#837a85}
+</style>
+</head>
+<body>
+<main>
+<p>FASHION TOOLS · БЕСПЛАТНО</p>
+<h1>Сколько ты действительно зарабатываешь на изделии?</h1>
+<p>Введи свои цифры. Калькулятор автоматически покажет расходы, прибыль и необходимое количество заказов.</p>
+
+<section class="card">
+<h2>01. Продажа и материалы</h2>
+<label>Цена продажи, ₽</label><input id="price" type="number" value="5000">
+<div class="grid">
+<div><label>Ткань и материалы, ₽</label><input id="fabric" type="number" value="900"></div>
+<div><label>Фурнитура, ₽</label><input id="hardware" type="number" value="250"></div>
+<div><label>Расходники и упаковка, ₽</label><input id="supplies" type="number" value="150"></div>
+<div><label>Другие расходы, ₽</label><input id="other" type="number" value="0"></div>
+</div>
+</section>
+
+<section class="card">
+<h2>02. Работа и накладные расходы</h2>
+<div class="grid">
+<div><label>Часов на изделие</label><input id="hours" type="number" value="2"></div>
+<div><label>Стоимость часа, ₽</label><input id="rate" type="number" value="600"></div>
+</div>
+<label>Накладные расходы на изделие, ₽</label><input id="overhead" type="number" value="200">
+<div class="grid">
+<div><label>Комиссии, % от цены</label><input id="commission" type="number" value="5"></div>
+<div><label>Налоги, % от выручки</label><input id="tax" type="number" value="6"></div>
+</div>
+</section>
+
+<section class="card">
+<h2>03. План дохода</h2>
+<div class="grid">
+<div><label>Заказов в месяц</label><input id="orders" type="number" value="20"></div>
+<div><label>Цель дохода, ₽</label><input id="goal" type="number" value="100000"></div>
+</div>
+</section>
+
+<section class="card result">
+<h2>Твой результат</h2>
+<div class="line"><span>Материалы и расходники</span><strong id="direct"></strong></div>
+<div class="line"><span>Стоимость работы</span><strong id="labor"></strong></div>
+<div class="line"><span>Себестоимость с накладными</span><strong id="cost"></strong></div>
+<div class="line"><span>Комиссии и налоги</span><strong id="fees"></strong></div>
+<div class="line big"><span>Прибыль с изделия</span><strong id="profit"></strong></div>
+<div class="line"><span>Рентабельность продаж</span><strong id="margin"></strong></div>
+<div class="line"><span>Результат за месяц</span><strong id="monthly"></strong></div>
+<div class="line"><span>Заказов для достижения цели</span><strong id="needed"></strong></div>
+<p><small>Расчёт ориентировочный. Стоимость твоего труда включена в расходы. Налоги рассчитаны по упрощённой модели.</small></p>
+</section>
+
+<section class="card">
+<button onclick="saveCSV()">Скачать расчёт CSV</button>
+<p><small>Все расчёты выполняются на устройстве. Данные не отправляются на сервер.</small></p>
+</section>
+</main>
+
+<script>
+const ids=["price","fabric","hardware","supplies","other","hours","rate","overhead","commission","tax","orders","goal"];
+const el=id=>document.getElementById(id);
+const num=id=>Math.max(0,Number(el(id).value)||0);
+const rub=n=>n.toLocaleString("ru-RU",{maximumFractionDigits:2})+" ₽";
+let result={};
+
+function calculate(){
+ const direct=num("fabric")+num("hardware")+num("supplies")+num("other");
+ const labor=num("hours")*num("rate");
+ const cost=direct+labor+num("overhead");
+ const fees=num("price")*(Math.min(100,num("commission"))+Math.min(100,num("tax")))/100;
+ const profit=num("price")-cost-fees;
+ const margin=num("price")?profit/num("price")*100:0;
+ const monthly=profit*Math.floor(num("orders"));
+ const needed=num("goal")===0?"0":profit>0?Math.ceil(num("goal")/profit):"Недостижимо";
+ result={direct,labor,cost,fees,profit,margin,monthly,needed};
+ ["direct","labor","cost","fees","profit","monthly"].forEach(id=>el(id).textContent=rub(result[id]));
+ el("margin").textContent=margin.toFixed(1)+" %";
+ el("needed").textContent=needed;
+}
+ids.forEach(id=>el(id).addEventListener("input",calculate));
+calculate();
+
+function saveCSV(){
+ const rows=[["Показатель","Значение"],...ids.map(id=>[id,num(id)]),...Object.entries(result)];
+ const csv="\uFEFF"+rows.map(r=>r.join(";")).join("\r\n");
+ const blob=new Blob([csv],{type:"text/csv;charset=utf-8"});
+ const url=URL.createObjectURL(blob);
+ const a=document.createElement("a");
+ a.href=url;a.download="fashion-raschet.csv";a.click();
+ setTimeout(()=>URL.revokeObjectURL(url),1000);
+}
+</script>
+</body>
+</html>
